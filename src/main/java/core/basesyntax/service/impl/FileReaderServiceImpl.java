@@ -10,21 +10,11 @@ public class FileReaderServiceImpl implements ReaderService {
 
     @Override
     public List<String> read(String filePath) {
-        if (filePath == null || filePath.trim().isEmpty()) {
-            throw new IllegalArgumentException("File path cannot be null or empty");
-        }
-
         try {
-            Path path = Path.of(filePath);
-            List<String> lines = Files.readAllLines(path);
-
-            if (lines.isEmpty()) {
-                throw new RuntimeException("File is empty: " + filePath);
-            }
-
-            return lines;
+            return Files.readAllLines(Path.of(filePath));
         } catch (IOException e) {
             throw new RuntimeException("Can't read file: " + filePath, e);
         }
     }
 }
+
