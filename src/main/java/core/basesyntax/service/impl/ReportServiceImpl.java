@@ -9,11 +9,14 @@ import java.util.List;
 import java.util.Map;
 
 public class ReportServiceImpl implements ReportService {
+    private static final String HEADER = "fruit,quantity";
+    private static final String COMMA = ",";
+
     @Override
     public void write(Map<String, Integer> report, String filePath) {
         List<String> lines = new ArrayList<>();
-        lines.add("fruit,quantity");
-        report.forEach((fruit, quantity) -> lines.add(fruit + "," + quantity));
+        lines.add(HEADER);
+        report.forEach((fruit, quantity) -> lines.add(fruit + COMMA + quantity));
         try {
             Files.write(Path.of(filePath), lines);
         } catch (IOException e) {
@@ -21,3 +24,4 @@ public class ReportServiceImpl implements ReportService {
         }
     }
 }
+
