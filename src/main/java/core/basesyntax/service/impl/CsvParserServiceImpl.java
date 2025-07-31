@@ -7,17 +7,22 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class CsvParserServiceImpl implements ParserService {
+    private static final String COMMA = ",";
+    private static final int HEADER_LINE_COUNT = 1;
+    private static final int OPERATION_INDEX = 0;
+    private static final int FRUIT_INDEX = 1;
+    private static final int QUANTITY_INDEX = 2;
 
     @Override
     public List<Transaction> parse(List<String> lines) {
         return lines.stream()
-                .skip(1) // пропускаем заголовок
+                .skip(HEADER_LINE_COUNT)
                 .map(line -> {
-                    String[] parts = line.split(",");
+                    String[] parts = line.split(COMMA);
                     return new Transaction(
-                            parts[1],
-                            OperationType.fromCode(parts[0]),
-                            Integer.parseInt(parts[2])
+                            parts[FRUIT_INDEX],
+                            OperationType.fromCode(parts[OPERATION_INDEX]),
+                            Integer.parseInt(parts[QUANTITY_INDEX])
                     );
                 })
                 .collect(Collectors.toList());
