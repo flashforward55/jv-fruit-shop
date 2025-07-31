@@ -2,36 +2,15 @@ package core.basesyntax.model;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 public class FruitBalance {
-    private final Map<String, Integer> balance = new HashMap<>();
+    private static final Map<String, Integer> storage = new HashMap<>();
 
     public void add(String fruit, int amount) {
-        Objects.requireNonNull(fruit, "Fruit name cannot be null");
-
-        if (fruit.trim().isEmpty()) {
-            throw new IllegalArgumentException("Fruit name cannot be empty");
-        }
-
-        int currentBalance = balance.getOrDefault(fruit, 0);
-        int newBalance = currentBalance + amount;
-
-        if (newBalance < 0) {
-            throw new IllegalStateException(
-                    String.format("Operation would result in negative balance for %s: %d",
-                            fruit, newBalance));
-        }
-
-        balance.put(fruit, newBalance);
+        storage.merge(fruit, amount, Integer::sum);
     }
 
     public Map<String, Integer> getAll() {
-        return new HashMap<>(balance);
-    }
-
-    public int getBalance(String fruit) {
-        Objects.requireNonNull(fruit, "Fruit name cannot be null");
-        return balance.getOrDefault(fruit, 0);
+        return storage;
     }
 }
