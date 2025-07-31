@@ -4,7 +4,6 @@ import core.basesyntax.model.Transaction;
 import core.basesyntax.service.OperationHandler;
 import core.basesyntax.service.TransactionProcessor;
 import core.basesyntax.strategy.OperationStrategy;
-
 import java.util.List;
 
 public class TransactionProcessorImpl implements TransactionProcessor {
