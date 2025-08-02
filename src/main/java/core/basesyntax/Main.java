@@ -1,20 +1,23 @@
 package core.basesyntax;
 
-import core.basesyntax.model.FruitBalance;
-import core.basesyntax.model.OperationType;
-import core.basesyntax.model.Transaction;
+import core.basesyntax.model.FruitTransaction;
+import core.basesyntax.service.DataConverter;
+import core.basesyntax.service.FileReader;
+import core.basesyntax.service.FileWriter;
 import core.basesyntax.service.OperationHandler;
-import core.basesyntax.service.ParserService;
-import core.basesyntax.service.ReaderService;
-import core.basesyntax.service.ReportService;
-import core.basesyntax.service.impl.CsvParserServiceImpl;
-import core.basesyntax.service.impl.FileReaderServiceImpl;
-import core.basesyntax.service.impl.ReportServiceImpl;
-import core.basesyntax.service.impl.handlers.BalanceHandler;
-import core.basesyntax.service.impl.handlers.PurchaseHandler;
-import core.basesyntax.service.impl.handlers.ReturnHandler;
-import core.basesyntax.service.impl.handlers.SupplyHandler;
+import core.basesyntax.service.ReportGenerator;
+import core.basesyntax.service.ShopService;
+import core.basesyntax.service.impl.BalanceOperationHandler;
+import core.basesyntax.service.impl.DataConverterImpl;
+import core.basesyntax.service.impl.FileReaderImpl;
+import core.basesyntax.service.impl.FileWriterImpl;
+import core.basesyntax.service.impl.PurchaseOperationHandler;
+import core.basesyntax.service.impl.ReportGeneratorImpl;
+import core.basesyntax.service.impl.ReturnOperationHandler;
+import core.basesyntax.service.impl.ShopServiceImpl;
+import core.basesyntax.service.impl.SupplyOperationHandler;
 import core.basesyntax.strategy.OperationStrategy;
+import core.basesyntax.strategy.impl.OperationStrategyImpl;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,27 +27,27 @@ public class Main {
     private static final String OUTPUT_FILE = "src/main/resources/report.csv";
 
     public static void main(String[] args) {
-        FruitBalance balance = new FruitBalance();
+        FileReader fileReader = new FileReaderImpl();
+        List<String> lines = fileReader.read(INPUT_FILE);
 
-        Map<OperationType, OperationHandler> handlers = new HashMap<>();
-        handlers.put(OperationType.BALANCE, new BalanceHandler(balance));
-        handlers.put(OperationType.SUPPLY, new SupplyHandler(balance));
-        handlers.put(OperationType.PURCHASE, new PurchaseHandler(balance));
-        handlers.put(OperationType.RETURN, new ReturnHandler(balance));
+        DataConverter converter = new DataConverterImpl();
 
-        OperationStrategy strategy = new OperationStrategy(handlers);
+        Map<FruitTransaction.Operation, OperationHandler> operationHandlers = new HashMap<>();
+        operationHandlers.put(FruitTransaction.Operation.BALANCE, new BalanceOperationHandler());
+        operationHandlers.put(FruitTransaction.Operation.SUPPLY, new SupplyOperationHandler());
+        operationHandlers.put(FruitTransaction.Operation.PURCHASE, new PurchaseOperationHandler());
+        operationHandlers.put(FruitTransaction.Operation.RETURN, new ReturnOperationHandler());
 
-        ReaderService reader = new FileReaderServiceImpl();
-        ParserService parser = new CsvParserServiceImpl();
-        ReportService reportService = new ReportServiceImpl();
+        OperationStrategy operationStrategy = new OperationStrategyImpl(operationHandlers);
+        ShopService shopService = new ShopServiceImpl(operationStrategy);
 
-        List<String> lines = reader.read(INPUT_FILE);
-        List<Transaction> transactions = parser.parse(lines);
+        List<FruitTransaction> transactions = converter.convertToTransaction(lines);
+        shopService.process(transactions);
 
-        for (Transaction transaction : transactions) {
-            strategy.getHandler(transaction.operation()).handle(transaction);
-        }
+        ReportGenerator reportGenerator = new ReportGeneratorImpl();
+        String resultingReport = reportGenerator.getReport();
 
-        reportService.write(balance.getAll(), OUTPUT_FILE);
+        FileWriter fileWriter = new FileWriterImpl();
+        fileWriter.write(resultingReport, OUTPUT_FILE);
     }
 }
