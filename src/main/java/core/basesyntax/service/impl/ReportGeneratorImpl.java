@@ -6,7 +6,7 @@ import core.basesyntax.service.ReportGenerator;
 public class ReportGeneratorImpl implements ReportGenerator {
     private static final String HEADER = "fruit,quantity";
     private static final String COMMA = ",";
-    private static final String LINE_SEPARATOR = "\n";
+    private static final String LINE_SEPARATOR = System.lineSeparator();
 
     @Override
     public String getReport() {
